@@ -1,24 +1,40 @@
 import sounddevice as sd
 from scipy.io.wavfile import write
-from pathlib import Path
+import tkinter as tk
+from tkinter import messagebox
 from datetime import datetime
 
 fs = 44100
+recording = None
 
-print("🎧 Music Recorder")
+def start_record():
+    global recording
+    duration = int(entry.get())
 
-duration = int(input("Kayıt süresi (saniye): "))
+    label.config(text="🎤 Kayıt başladı...")
 
-recordings = Path("recordings")
-recordings.mkdir(exist_ok=True)
+    recording = sd.rec(int(duration * fs), samplerate=fs, channels=2)
+    sd.wait()
 
-filename = recordings / f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.wav"
+    filename = f"recordings/{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.wav"
+    write(filename, fs, recording)
 
-print("🎤 Kayıt başladı...")
+    label.config(text="✔ Kayıt bitti!")
+    messagebox.showinfo("Kaydedildi", filename)
 
-audio = sd.rec(int(duration * fs), samplerate=fs, channels=2)
-sd.wait()
+# GUI
+window = tk.Tk()
+window.title("🎧 Music Recorder")
+window.geometry("300x200")
 
-write(str(filename), fs, audio)
+tk.Label(window, text="Süre (saniye):").pack()
 
-print("✔ Kaydedildi:", filename)
+entry = tk.Entry(window)
+entry.pack()
+
+tk.Button(window, text="🎤 Kaydı Başlat", command=start_record).pack(pady=10)
+
+label = tk.Label(window, text="")
+label.pack()
+
+window.mainloop()
