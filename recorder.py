@@ -1,16 +1,24 @@
 import sounddevice as sd
 from scipy.io.wavfile import write
-import time
+from pathlib import Path
+from datetime import datetime
 
 fs = 44100
 
-name = input("Kayıt adı: ")
-duration = int(input("Süre: "))
+print("🎧 Music Recorder")
+
+duration = int(input("Kayıt süresi (saniye): "))
+
+recordings = Path("recordings")
+recordings.mkdir(exist_ok=True)
+
+filename = recordings / f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.wav"
+
+print("🎤 Kayıt başladı...")
 
 audio = sd.rec(int(duration * fs), samplerate=fs, channels=2)
 sd.wait()
 
-filename = f"{name}_{int(time.time())}.wav"
-write(filename, fs, audio)
+write(str(filename), fs, audio)
 
-print("Kaydedildi:", filename)
+print("✔ Kaydedildi:", filename)
